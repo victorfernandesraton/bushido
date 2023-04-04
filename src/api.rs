@@ -14,23 +14,51 @@ struct MangaPagesResponse {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct MangaData {
-    id_serie: u64,
+pub struct MangaData {
+    pub id_serie: u64,
     label: String,
-    link: String,
+    pub link: String,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
-enum MangaSearchSerie {
+pub enum MangaSearchSerie {
     Simple(bool),
     Explicit(Vec<MangaData>)
 }
 
+
 #[derive(Deserialize, Debug)]
+
 pub struct MangaSearchResponse {
-    series: MangaSearchSerie
+    pub series: MangaSearchSerie
 }
+
+#[derive(Deserialize, Debug)]
+
+pub struct MangaChapterData {
+    id_serie: u64,
+    pub id_chapter: u64,
+    name: String,
+    chapter_name:String,
+    pub number: String,
+    // TODO: parse datetime
+    date_created: String
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+pub enum MangaChapter {
+    Simple(bool),
+    Explicit(Vec<MangaChapterData>)
+}
+
+#[derive(Deserialize, Debug)]
+pub struct MangaChapterResponse {
+    pub chapters: MangaChapter
+}
+
+
 
 
 fn get_manga_images_reqyest(id: u64) -> Result<MangaPagesResponse, RequestError> {
@@ -43,7 +71,7 @@ pub fn search(query: &str) -> Result<MangaSearchResponse, RequestError> {
     let client = blocking::Client::new();
     let body = [("search", query)];
 
-    let response = client
+    let response: MangaSearchResponse = client
         .post("https://mangalivre.net/lib/search/series.json")
         .form(&body)
         .header("X-Requested-With", "XMLHttpRequest")
@@ -51,15 +79,21 @@ pub fn search(query: &str) -> Result<MangaSearchResponse, RequestError> {
         .unwrap()
         .json()?;
 
+
     Ok(response)
 }
 
-pub fn get_images(url: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+fn get_manga_id_by_url(url: &str) -> Result<u64,  Box<dyn std::error::Error>> {
     let elementos: Vec<&str> = url.split('/').collect();
     let id = elementos
         .get(6)
         .ok_or("Unable to parse ID")?
         .parse::<u64>()?;
+    Ok(id)
+}
+
+pub fn get_images(url: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let id = get_manga_id_by_url(url)?;
     let response = get_manga_images_reqyest(id)?;
     let items = response
         .images
@@ -67,4 +101,18 @@ pub fn get_images(url: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> 
         .map(|manga_page| manga_page.legacy.clone())
         .collect();
     Ok(items)
+}
+
+pub fn get_chapters(id: u64) -> Result<MangaChapterResponse, RequestError> {
+    let url = format!("https://mangalivre.net/series/chapters_list.json?page=1&id_serie={}", id);
+
+    let client = blocking::Client::new();
+
+    let response = client
+        .get(url)
+        .header("X-Requested-With", "XMLHttpRequest")
+        .send()
+        .unwrap().json::<MangaChapterResponse>()?;
+    
+    Ok(response)
 }
