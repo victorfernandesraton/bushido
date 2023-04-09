@@ -1,0 +1,284 @@
+package mangalivre
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+
+	"github.com/victorfernandesraton/bushido"
+	"golang.org/x/net/html"
+)
+
+type MangaLivre struct {
+}
+
+type seriesItem struct {
+	IDSerie        int    `json:"id_serie,omitempty"`
+	Name           string `json:"name,omitempty"`
+	Label          string `json:"label,omitempty"`
+	Score          string `json:"score,omitempty"`
+	Value          string `json:"value,omitempty"`
+	Author         string `json:"author,omitempty"`
+	Artist         string `json:"artist,omitempty"`
+	Cover          string `json:"cover,omitempty"`
+	CoverThumb     string `json:"cover_thumb,omitempty"`
+	CoverAvif      string `json:"cover_avif,omitempty"`
+	CoverThumbAvif string `json:"cover_thumb_avif,omitempty"`
+	Link           string `json:"link,omitempty"`
+	IsComplete     bool   `json:"is_complete,omitempty"`
+}
+
+type seriesResponse struct {
+	Series *[]seriesItem `json:"series"`
+}
+
+type chapterItem struct {
+	IDSerie     int    `json:"id_serie,omitempty"`
+	IDChapter   int    `json:"id_chapter,omitempty"`
+	Name        string `json:"name,omitempty"`
+	ChapterName string `json:"chapter_name,omitempty"`
+	Number      string `json:"number,omitempty"`
+}
+
+type chapterResponse struct {
+	Chapters *[]chapterItem `json:"chapters"`
+}
+
+type page struct {
+	Legacy string `json:"legacy,omitempty"`
+	Avif   string `json:"avif,omitempty"`
+}
+
+type pageResponse struct {
+	Images *[]page
+}
+
+func (source *MangaLivre) Search(query string) (*[]bushido.Content, error) {
+
+	formData := url.Values{}
+	formData.Set("search", query)
+
+	req, err := http.NewRequest("POST", "https://mangalivre.net/lib/search/series.json", bytes.NewReader([]byte(formData.Encode())))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+
+	client := http.Client{}
+	res, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("request status error, expect 200, got %v", res.StatusCode)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var data seriesResponse
+	var result []bushido.Content
+
+	defer res.Body.Close()
+	err = json.NewDecoder(res.Body).Decode(&data)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "json: cannot unmarshal bool into") {
+			return &result, nil
+		}
+		return nil, err
+	}
+
+	if data.Series == nil {
+		return &result, nil
+	}
+
+	for _, v := range *data.Series {
+		result = append(result, bushido.Content{
+			ExternalId: fmt.Sprintf("%d", v.IDSerie),
+			Title:      v.Name,
+			Source:     "mangalivre",
+			Author:     v.Author,
+			Link:       v.Link,
+		})
+	}
+
+	return &result, nil
+
+}
+
+func (source *MangaLivre) parseUrlToId(url string) (int, error) {
+	paths := strings.Split(url, "/")
+	if len(paths) < 6 {
+		return 0, fmt.Errorf("not valid url")
+	}
+
+	value, err := strconv.Atoi(paths[5])
+	if err != nil {
+		return 0, err
+	}
+
+	return value, nil
+}
+
+func (source *MangaLivre) Chapters(link string) (*[]bushido.Chapter, error) {
+	id, err := source.parseUrlToId(link)
+	if err != nil {
+		return nil, err
+	}
+	url := fmt.Sprintf("https://mangalivre.net/series/chapters_list.json?page=1&id_serie=%v", id)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+
+	client := http.Client{}
+	res, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("request status error, expect 200, got %v", res.StatusCode)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var data chapterResponse
+	var result []bushido.Chapter
+
+	defer res.Body.Close()
+	err = json.NewDecoder(res.Body).Decode(&data)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "json: cannot unmarshal bool into") {
+			return &result, nil
+		}
+		return nil, err
+	}
+
+	if data.Chapters == nil {
+		return &result, nil
+	}
+
+	for _, v := range *data.Chapters {
+		result = append(result, bushido.Chapter{
+			ExternalId: fmt.Sprintf("%d", v.IDSerie),
+			Title:      fmt.Sprintf("%s - %s", v.Name, v.Number),
+		})
+	}
+
+	return &result, nil
+}
+func (source *MangaLivre) Pages(contentId string, chapterId string) (*[]bushido.Page, error) {
+
+	url := fmt.Sprintf("https://mangalivre.net/leitor/pages/%s.jso", chapterId)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+
+	client := http.Client{}
+	res, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("request status error, expect 200, got %v", res.StatusCode)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var data pageResponse
+	var result []bushido.Page
+
+	defer res.Body.Close()
+	err = json.NewDecoder(res.Body).Decode(&data)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "json: cannot unmarshal bool into") {
+			return &result, nil
+		}
+		return nil, err
+	}
+
+	if data.Images == nil {
+		return &result, nil
+	}
+
+	for _, v := range *data.Images {
+		result = append(result, bushido.Page(v.Legacy))
+	}
+
+	return &result, nil
+}
+
+func (source *MangaLivre) Info(link string) (*bushido.Content, error) {
+
+	// Send GET request
+	resp, err := http.Get(link)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Parse HTML response
+	doc, err := html.Parse(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the meta description tag
+	var metaDescription string
+	var traverse func(*html.Node)
+	traverse = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "meta" {
+			for _, attr := range n.Attr {
+				if attr.Key == "name" && attr.Val == "description" {
+					for _, attr := range n.Attr {
+						if attr.Key == "content" {
+							metaDescription = attr.Val
+							return
+						}
+					}
+				}
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			traverse(c)
+		}
+	}
+	traverse(doc)
+
+	// Print the meta description
+	return &bushido.Content{
+		Description: metaDescription,
+	}, nil
+}
+
+// Install(link string) error
+// Sync() error
+// List(query string) (error []Content)
+// Remove(id uint64) error
