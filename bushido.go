@@ -1,11 +1,15 @@
 package bushido
 
+type BasicContent struct {
+	ExternalId string
+	Title      string
+	Link       string
+	Source     string
+}
+
 type Content struct {
-	ExternalId  string
-	Title       string
-	Link        string
+	BasicContent
 	Description string
-	Source      string
 	Author      string
 }
 
@@ -22,8 +26,9 @@ type Client interface {
 	Chapters(link string) (*[]Chapter, error)
 	Pages(contentId string, chapterId string) (*[]Page, error)
 	Info(link string) (*Content, error)
+	// Deepends of sqlite
 	Install(link string) error
-	Sync() error
-	List(query string) (error []Content)
+	Sync(link string) error
+	List() (error []Content)
 	Remove(id uint64) error
 }

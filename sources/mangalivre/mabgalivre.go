@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/antchfx/htmlquery"
 	"github.com/victorfernandesraton/bushido"
-	"golang.org/x/net/html"
 )
 
 type MangaLivre struct {
@@ -57,7 +57,7 @@ type pageResponse struct {
 	Images *[]page
 }
 
-func (source *MangaLivre) Search(query string) (*[]bushido.Content, error) {
+func (source *MangaLivre) Search(query string) (*[]bushido.BasicContent, error) {
 
 	formData := url.Values{}
 	formData.Set("search", query)
@@ -86,7 +86,7 @@ func (source *MangaLivre) Search(query string) (*[]bushido.Content, error) {
 	}
 
 	var data seriesResponse
-	var result []bushido.Content
+	var result []bushido.BasicContent
 
 	defer res.Body.Close()
 	err = json.NewDecoder(res.Body).Decode(&data)
@@ -103,11 +103,10 @@ func (source *MangaLivre) Search(query string) (*[]bushido.Content, error) {
 	}
 
 	for _, v := range *data.Series {
-		result = append(result, bushido.Content{
+		result = append(result, bushido.BasicContent{
 			ExternalId: fmt.Sprintf("%d", v.IDSerie),
 			Title:      v.Name,
 			Source:     "mangalivre",
-			Author:     v.Author,
 			Link:       v.Link,
 		})
 	}
@@ -237,44 +236,23 @@ func (source *MangaLivre) Pages(contentId string, chapterId string) (*[]bushido.
 
 func (source *MangaLivre) Info(link string) (*bushido.Content, error) {
 
-	// Send GET request
-	resp, err := http.Get(link)
-	if err != nil {
-		return nil, err
+	if !strings.Contains(link, "https://mangalivre.net/") {
+		return nil, fmt.Errorf("not valid url")
 	}
-	defer resp.Body.Close()
-
-	// Parse HTML response
-	doc, err := html.Parse(resp.Body)
+	doc, err := htmlquery.LoadURL(link)
 	if err != nil {
 		return nil, err
 	}
 
-	// Find the meta description tag
-	var metaDescription string
-	var traverse func(*html.Node)
-	traverse = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "meta" {
-			for _, attr := range n.Attr {
-				if attr.Key == "name" && attr.Val == "description" {
-					for _, attr := range n.Attr {
-						if attr.Key == "content" {
-							metaDescription = attr.Val
-							return
-						}
-					}
-				}
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			traverse(c)
-		}
-	}
-	traverse(doc)
-
-	// Print the meta description
+	descriptionNosw := htmlquery.FindOne(doc, "//html/body/div[5]/div/div[3]/div[5]/div[2]/span[3]/span")
+	titleNode := htmlquery.FindOne(doc, "//html/body/div[5]/div/div[3]/div[5]/div[2]/span[1]/h1")
 	return &bushido.Content{
-		Description: metaDescription,
+		BasicContent: bushido.BasicContent{
+			Title:  titleNode.FirstChild.Data,
+			Link:   link,
+			Source: "mangalivre",
+		},
+		Description: descriptionNosw.FirstChild.Data,
 	}, nil
 }
 
