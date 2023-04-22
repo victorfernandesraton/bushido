@@ -9,8 +9,9 @@ type BasicContent struct {
 
 type Content struct {
 	BasicContent
-	Description string
-	Author      string
+	Description   string
+	Author        string
+	TotalChapters int64
 }
 
 type Chapter struct {

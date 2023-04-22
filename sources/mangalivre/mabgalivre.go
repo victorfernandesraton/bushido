@@ -3,6 +3,7 @@ package mangalivre
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -129,12 +130,12 @@ func (source *MangaLivre) parseUrlToId(url string) (int, error) {
 	return value, nil
 }
 
-func (source *MangaLivre) Chapters(link string) (*[]bushido.Chapter, error) {
+func (source *MangaLivre) Chapters(link string, page int) (*[]bushido.Chapter, error) {
 	id, err := source.parseUrlToId(link)
 	if err != nil {
 		return nil, err
 	}
-	url := fmt.Sprintf("https://mangalivre.net/series/chapters_list.json?page=1&id_serie=%v", id)
+	url := fmt.Sprintf("https://mangalivre.net/series/chapters_list.json?page=%v&id_serie=%v", page, id)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -246,13 +247,21 @@ func (source *MangaLivre) Info(link string) (*bushido.Content, error) {
 
 	descriptionNosw := htmlquery.FindOne(doc, "//html/body/div[5]/div/div[3]/div[5]/div[2]/span[3]/span")
 	titleNode := htmlquery.FindOne(doc, "//html/body/div[5]/div/div[3]/div[5]/div[2]/span[1]/h1")
+	totalChaptersStr := htmlquery.FindOne(doc, "//html/body/div[5]/div/div[4]/div[3]/h2/span")
+	fmt.Println(totalChaptersStr)
+	totalChapters, err := strconv.Atoi(totalChaptersStr.FirstChild.Data)
+	if err != nil {
+		return nil, errors.New("not valid find html total chapters")
+	}
+
 	return &bushido.Content{
 		BasicContent: bushido.BasicContent{
 			Title:  titleNode.FirstChild.Data,
 			Link:   link,
 			Source: "mangalivre",
 		},
-		Description: descriptionNosw.FirstChild.Data,
+		TotalChapters: int64(totalChapters),
+		Description:   descriptionNosw.FirstChild.Data,
 	}, nil
 }
 
