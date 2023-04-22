@@ -54,6 +54,7 @@ func Test_Chapters(t *testing.T) {
 	type args struct {
 		link         string
 		err          error
+		recursive    bool
 		totalChapter int
 		hasData      bool
 	}
@@ -72,6 +73,16 @@ func Test_Chapters(t *testing.T) {
 			},
 		},
 		{
+			"success with solo leveling with recursive chapters",
+			args{
+				link:         "https://mangalivre.net/manga/solo-leveling/7702",
+				err:          nil,
+				hasData:      true,
+				totalChapter: 194,
+				recursive:    true,
+			},
+		},
+		{
 			"error with invalid url",
 			args{
 				link:         "https://www.google.com",
@@ -84,7 +95,7 @@ func Test_Chapters(t *testing.T) {
 
 	for _, tt := range testcases {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := stub.Chapters(tt.args.link, 1)
+			data, err := stub.Chapters(tt.args.link, tt.args.recursive)
 
 			if !tt.args.hasData {
 				if err.Error() != tt.args.err.Error() {
@@ -99,7 +110,7 @@ func Test_Chapters(t *testing.T) {
 			if data == nil {
 				t.Errorf("expected data is not empty, got %v", data)
 			}
-			if len(*data) != tt.args.totalChapter {
+			if len(data) != tt.args.totalChapter {
 				t.Errorf("expected data is not empty, got %v", data)
 			}
 		})
@@ -171,7 +182,7 @@ func Test_Info(t *testing.T) {
 		description  string
 		err          error
 		hasContent   bool
-		totalChapter int64
+		totalChapter int
 	}
 
 	testcases := []struct {

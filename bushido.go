@@ -11,7 +11,7 @@ type Content struct {
 	BasicContent
 	Description   string
 	Author        string
-	TotalChapters int64
+	TotalChapters int
 }
 
 type Chapter struct {
@@ -23,13 +23,13 @@ type Chapter struct {
 type Page string
 
 type Client interface {
-	Search(query string) (*[]Content, error)
-	Chapters(link string) (*[]Chapter, error)
-	Pages(contentId string, chapterId string) (*[]Page, error)
-	Info(link string) (*Content, error)
+	Search(query string) ([]Content, error)
+	Chapters(link string, recursive bool) ([]Chapter, error)
+	Pages(contentId string, chapterId string) ([]Page, error)
+	Info(link string) (Content, error)
 	// Deepends of sqlite
 	Install(link string) error
 	Sync(link string) error
-	List() (error []Content)
+	List() ([]Content, error)
 	Remove(id uint64) error
 }

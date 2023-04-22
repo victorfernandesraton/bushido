@@ -130,7 +130,34 @@ func (source *MangaLivre) parseUrlToId(url string) (int, error) {
 	return value, nil
 }
 
-func (source *MangaLivre) Chapters(link string, page int) (*[]bushido.Chapter, error) {
+func (source *MangaLivre) Chapters(link string, recursive bool) ([]bushido.Chapter, error) {
+	var chapters []bushido.Chapter
+	if recursive {
+		info, err := source.Info(link)
+		if err != nil {
+			return nil, err
+		}
+		coutChapter := 0
+		currentPage := 0
+		for coutChapter < int(info.TotalChapters) {
+			currentPage++
+			chapterList, err := source.ChaptersByPage(link, currentPage)
+			if err != nil {
+				return nil, err
+			}
+			coutChapter += len(chapterList)
+			chapters = append(chapters, chapterList...)
+
+		}
+
+		return chapters, nil
+
+	} else {
+		return source.ChaptersByPage(link, 1)
+	}
+}
+
+func (source *MangaLivre) ChaptersByPage(link string, page int) ([]bushido.Chapter, error) {
 	id, err := source.parseUrlToId(link)
 	if err != nil {
 		return nil, err
@@ -167,13 +194,13 @@ func (source *MangaLivre) Chapters(link string, page int) (*[]bushido.Chapter, e
 
 	if err != nil {
 		if strings.Contains(err.Error(), "json: cannot unmarshal bool into") {
-			return &result, nil
+			return result, nil
 		}
 		return nil, err
 	}
 
 	if data.Chapters == nil {
-		return &result, nil
+		return result, nil
 	}
 
 	for _, v := range *data.Chapters {
@@ -183,8 +210,9 @@ func (source *MangaLivre) Chapters(link string, page int) (*[]bushido.Chapter, e
 		})
 	}
 
-	return &result, nil
+	return result, nil
 }
+
 func (source *MangaLivre) Pages(contentId string, chapterId string) (*[]bushido.Page, error) {
 
 	url := fmt.Sprintf("https://mangalivre.net/leitor/pages/%s.jso", chapterId)
@@ -260,7 +288,7 @@ func (source *MangaLivre) Info(link string) (*bushido.Content, error) {
 			Link:   link,
 			Source: "mangalivre",
 		},
-		TotalChapters: int64(totalChapters),
+		TotalChapters: totalChapters,
 		Description:   descriptionNosw.FirstChild.Data,
 	}, nil
 }
