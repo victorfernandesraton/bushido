@@ -38,11 +38,16 @@ type seriesResponse struct {
 }
 
 type chapterItem struct {
-	IDSerie     int    `json:"id_serie,omitempty"`
-	IDChapter   int    `json:"id_chapter,omitempty"`
-	Name        string `json:"name,omitempty"`
-	ChapterName string `json:"chapter_name,omitempty"`
-	Number      string `json:"number,omitempty"`
+	IDSerie     int                    `json:"id_serie,omitempty"`
+	IDChapter   int                    `json:"id_chapter,omitempty"`
+	Name        string                 `json:"name,omitempty"`
+	ChapterName string                 `json:"chapter_name,omitempty"`
+	Number      string                 `json:"number,omitempty"`
+	Releases    map[string]releaseItem `json:"releases,omitempty"`
+}
+
+type releaseItem struct {
+	IDRelease int `json:"id_release,omitempty"`
 }
 
 type chapterResponse struct {
@@ -140,10 +145,18 @@ func (source *MangaLivre) parseUrlToId(url string) (int, error) {
 	return value, nil
 }
 
+func (source *MangaLivre) parseUrltoName(url string) (string, error) {
+	paths := strings.Split(url, "/")
+	if len(paths) < 5 {
+		return "", fmt.Errorf("not valid url")
+	}
+
+	return paths[4], nil
+}
 func (source *MangaLivre) Chapters(link string, recursive bool) ([]bushido.Chapter, error) {
 	var chapters []bushido.Chapter
+	info, err := source.Info(link)
 	if recursive {
-		info, err := source.Info(link)
 		if err != nil {
 			return nil, err
 		}
@@ -163,8 +176,19 @@ func (source *MangaLivre) Chapters(link string, recursive bool) ([]bushido.Chapt
 		return chapters, nil
 
 	} else {
-		return source.chaptersByPage(link, 1)
+		chapterList, err := source.chaptersByPage(link, 1)
+		if err != nil {
+			return nil, err
+		}
+		chapters = append(chapters, chapterList...)
 	}
+
+	for k, v := range chapters {
+		v.Content = info
+		chapters[k] = v
+	}
+
+	return chapters, nil
 }
 
 func (source *MangaLivre) chaptersByPage(link string, page int) ([]bushido.Chapter, error) {
@@ -172,6 +196,11 @@ func (source *MangaLivre) chaptersByPage(link string, page int) ([]bushido.Chapt
 	if err != nil {
 		return nil, err
 	}
+	name, err := source.parseUrltoName(link)
+	if err != nil {
+		return nil, err
+	}
+
 	url := fmt.Sprintf("https://mangalivre.net/series/chapters_list.json?page=%v&id_serie=%v", page, id)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -214,9 +243,17 @@ func (source *MangaLivre) chaptersByPage(link string, page int) ([]bushido.Chapt
 	}
 
 	for _, v := range *data.Chapters {
+		resultLink := "not avaliable"
+		if len(v.Releases) > 0 {
+			for _, releases := range v.Releases {
+				resultLink = fmt.Sprintf("https://mangalivre.net/ler/%s/online/%d/%s", name, releases.IDRelease, v.Number)
+				break
+			}
+		}
 		result = append(result, bushido.Chapter{
-			ExternalId: fmt.Sprintf("%d", v.IDSerie),
+			ExternalId: fmt.Sprintf("%d", v.IDChapter),
 			Title:      fmt.Sprintf("%s - %s", v.Name, v.Number),
+			Link:       resultLink,
 		})
 	}
 

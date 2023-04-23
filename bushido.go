@@ -17,6 +17,7 @@ type Content struct {
 type Chapter struct {
 	ExternalId string
 	Title      string
+	Link       string
 	Content    *Content
 }
 

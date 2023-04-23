@@ -8,13 +8,10 @@ import (
 )
 
 func init() {
-
-	cmd.RootCmd.AddCommand(cmd.InfoCmd)
-	cmd.RootCmd.AddCommand(cmd.SearchCmd)
-
+	cmd.RootCmd.AddCommand(cmd.InfoCmd, cmd.ChapterCmd, cmd.SearchCmd)
 }
-func main() {
 
+func main() {
 	if err := cmd.RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

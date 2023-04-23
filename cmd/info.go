@@ -13,7 +13,6 @@ var InfoCmd = &cobra.Command{
 	TraverseChildren: true,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-
 		sourcesData := Sources()
 		selectedSource, err := cmd.Flags().GetString("source")
 		if err != nil {
@@ -30,8 +29,7 @@ var InfoCmd = &cobra.Command{
 		}
 		table := RenderTable([]string{"Title", "Author", "Link", "source"}, [][]string{
 			{res.Title, res.Author, res.Link, res.Source},
-		},
-		)
+		})
 
 		table.Render()
 
