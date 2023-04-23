@@ -41,7 +41,7 @@ func Test_Search(t *testing.T) {
 			if err != tt.args.err {
 				t.Errorf("expected err is %v, got %v", tt.args.err, err)
 			}
-			if data == nil && len(*data) == 0 {
+			if data == nil && len(data) == 0 {
 				t.Errorf("expected data is not empty, got %v", data)
 			}
 		})
@@ -166,8 +166,8 @@ func Test_Pages(t *testing.T) {
 			if data == nil {
 				t.Errorf("expected data is not empty, got %v", data)
 			}
-			if len(*data) != tt.args.totalPages {
-				t.Errorf("expected data size is %d, got %d", tt.args.totalPages, len(*data))
+			if len(data) != tt.args.totalPages {
+				t.Errorf("expected data size is %d, got %d", tt.args.totalPages, len(data))
 			}
 		})
 	}

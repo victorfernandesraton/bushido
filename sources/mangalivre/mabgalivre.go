@@ -58,7 +58,15 @@ type pageResponse struct {
 	Images *[]page
 }
 
-func (source *MangaLivre) Search(query string) (*[]bushido.BasicContent, error) {
+func (source *MangaLivre) Source() string {
+	return "mangalivre"
+}
+
+func New() bushido.Client {
+	return &MangaLivre{}
+}
+
+func (source *MangaLivre) Search(query string) ([]bushido.Content, error) {
 
 	formData := url.Values{}
 	formData.Set("search", query)
@@ -87,32 +95,34 @@ func (source *MangaLivre) Search(query string) (*[]bushido.BasicContent, error) 
 	}
 
 	var data seriesResponse
-	var result []bushido.BasicContent
+	var result []bushido.Content
 
 	defer res.Body.Close()
 	err = json.NewDecoder(res.Body).Decode(&data)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "json: cannot unmarshal bool into") {
-			return &result, nil
+			return result, nil
 		}
 		return nil, err
 	}
 
 	if data.Series == nil {
-		return &result, nil
+		return result, nil
 	}
 
 	for _, v := range *data.Series {
-		result = append(result, bushido.BasicContent{
-			ExternalId: fmt.Sprintf("%d", v.IDSerie),
-			Title:      v.Name,
-			Source:     "mangalivre",
-			Link:       v.Link,
+		result = append(result, bushido.Content{
+			BasicContent: bushido.BasicContent{
+				ExternalId: fmt.Sprintf("%d", v.IDSerie),
+				Title:      v.Name,
+				Source:     "mangalivre",
+				Link:       v.Link,
+			},
 		})
 	}
 
-	return &result, nil
+	return result, nil
 
 }
 
@@ -141,7 +151,7 @@ func (source *MangaLivre) Chapters(link string, recursive bool) ([]bushido.Chapt
 		currentPage := 0
 		for coutChapter < int(info.TotalChapters) {
 			currentPage++
-			chapterList, err := source.ChaptersByPage(link, currentPage)
+			chapterList, err := source.chaptersByPage(link, currentPage)
 			if err != nil {
 				return nil, err
 			}
@@ -153,11 +163,11 @@ func (source *MangaLivre) Chapters(link string, recursive bool) ([]bushido.Chapt
 		return chapters, nil
 
 	} else {
-		return source.ChaptersByPage(link, 1)
+		return source.chaptersByPage(link, 1)
 	}
 }
 
-func (source *MangaLivre) ChaptersByPage(link string, page int) ([]bushido.Chapter, error) {
+func (source *MangaLivre) chaptersByPage(link string, page int) ([]bushido.Chapter, error) {
 	id, err := source.parseUrlToId(link)
 	if err != nil {
 		return nil, err
@@ -213,7 +223,7 @@ func (source *MangaLivre) ChaptersByPage(link string, page int) ([]bushido.Chapt
 	return result, nil
 }
 
-func (source *MangaLivre) Pages(contentId string, chapterId string) (*[]bushido.Page, error) {
+func (source *MangaLivre) Pages(contentId string, chapterId string) ([]bushido.Page, error) {
 
 	url := fmt.Sprintf("https://mangalivre.net/leitor/pages/%s.jso", chapterId)
 	req, err := http.NewRequest("GET", url, nil)
@@ -247,20 +257,20 @@ func (source *MangaLivre) Pages(contentId string, chapterId string) (*[]bushido.
 
 	if err != nil {
 		if strings.Contains(err.Error(), "json: cannot unmarshal bool into") {
-			return &result, nil
+			return result, nil
 		}
 		return nil, err
 	}
 
 	if data.Images == nil {
-		return &result, nil
+		return result, nil
 	}
 
 	for _, v := range *data.Images {
 		result = append(result, bushido.Page(v.Legacy))
 	}
 
-	return &result, nil
+	return result, nil
 }
 
 func (source *MangaLivre) Info(link string) (*bushido.Content, error) {
@@ -276,7 +286,6 @@ func (source *MangaLivre) Info(link string) (*bushido.Content, error) {
 	descriptionNosw := htmlquery.FindOne(doc, "//html/body/div[5]/div/div[3]/div[5]/div[2]/span[3]/span")
 	titleNode := htmlquery.FindOne(doc, "//html/body/div[5]/div/div[3]/div[5]/div[2]/span[1]/h1")
 	totalChaptersStr := htmlquery.FindOne(doc, "//html/body/div[5]/div/div[4]/div[3]/h2/span")
-	fmt.Println(totalChaptersStr)
 	totalChapters, err := strconv.Atoi(totalChaptersStr.FirstChild.Data)
 	if err != nil {
 		return nil, errors.New("not valid find html total chapters")
@@ -292,8 +301,3 @@ func (source *MangaLivre) Info(link string) (*bushido.Content, error) {
 		Description:   descriptionNosw.FirstChild.Data,
 	}, nil
 }
-
-// Install(link string) error
-// Sync() error
-// List(query string) (error []Content)
-// Remove(id uint64) error
