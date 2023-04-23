@@ -117,7 +117,7 @@ func (source *MangaLivre) Search(query string) ([]bushido.Content, error) {
 				ExternalId: fmt.Sprintf("%d", v.IDSerie),
 				Title:      v.Name,
 				Source:     "mangalivre",
-				Link:       v.Link,
+				Link:       fmt.Sprintf("https://mangalivre.net%s", v.Link),
 			},
 		})
 	}
