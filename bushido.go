@@ -41,6 +41,7 @@ type LocalStorage interface {
 	// Remove(int) error
 	FindById(int) (*Content, error)
 	FindByLink(string) (*Content, error)
+	ListByName(string) ([]Content, error)
 
-	// AppendChapter([]Chapter) error
+	AppendChapter(int, []Chapter) error
 }

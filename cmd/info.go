@@ -8,7 +8,7 @@ import (
 
 var InfoCmd = &cobra.Command{
 	Use:              "info [LINK]",
-	Short:            "Get mangainfo from source",
+	Short:            "Get mangainfo fromb local or source",
 	Args:             cobra.MinimumNArgs(1),
 	TraverseChildren: true,
 

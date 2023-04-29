@@ -257,7 +257,7 @@ func (source *MangaLivre) chaptersByPage(link string, page int) ([]bushido.Chapt
 			Title:      fmt.Sprintf("%s - %s", v.Name, v.Number),
 			Link:       resultLink,
 			Content: &bushido.Content{
-				BasicContent: bushido.BasicContent{ExternalId: fmt.Sprintf("%d", id)},
+				BasicContent: bushido.BasicContent{ExternalId: fmt.Sprintf("%d", id), Source: "mangalivre"},
 			},
 		})
 	}

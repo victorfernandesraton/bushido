@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 
 	"github.com/spf13/cobra"
-	"github.com/victorfernandesraton/bushido/storage"
 )
 
 var AddCmd = &cobra.Command{
@@ -18,15 +16,9 @@ var AddCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sourcesData := Sources()
 
-		db, err := sql.Open("sqlite3", "sqlite-bushido.db")
+		db, err := DatabseFactory()
 		if err != nil {
-			panic(err)
-		}
-
-		st := storage.New(db)
-
-		if err := st.CreateTables(); err != nil {
-			panic(err)
+			return err
 		}
 
 		selectedSource, err := cmd.Flags().GetString("source")
@@ -45,7 +37,7 @@ var AddCmd = &cobra.Command{
 
 		log.Println(res)
 
-		if err := st.Add(*res); err != nil {
+		if err := db.Add(*res); err != nil {
 			return err
 		}
 
