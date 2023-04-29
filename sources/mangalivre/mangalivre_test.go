@@ -150,9 +150,6 @@ func Test_Pages(t *testing.T) {
 				}
 				return
 			}
-			// if data == nil {
-			// 	t.Errorf("expected data is not empty, got %v", data)
-			// }
 			if len(data) != tt.args.totalPages {
 				t.Errorf("expected data size is %d, got %d", tt.args.totalPages, len(data))
 			}

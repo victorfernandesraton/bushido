@@ -29,11 +29,6 @@ type Client interface {
 	Pages(contentId string, chapterId string) ([]Page, error)
 	Info(link string) (*Content, error)
 	Source() string
-	// Deepends of sqlite
-	// Install(link string) error
-	// Sync(link string) error
-	// List() ([]Content, error)
-	// Remove(id uint64) error
 }
 
 type LocalStorage interface {
@@ -42,6 +37,6 @@ type LocalStorage interface {
 	FindById(int) (*Content, error)
 	FindByLink(string) (*Content, error)
 	ListByName(string) ([]Content, error)
-
 	AppendChapter(int, []Chapter) error
+	ListChaptersByContentId(int) ([]Chapter, error)
 }

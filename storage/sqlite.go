@@ -182,3 +182,33 @@ func (s *StorageSqlte) AppendChapter(id int, chapters []bushido.Chapter) error {
 	return nil
 
 }
+
+func (s *StorageSqlte) ListChaptersByContentId(contentId int) ([]bushido.Chapter, error) {
+	var result []bushido.Chapter
+	rows, err := s.db.Query(`
+        SELECT
+            external_id,
+            title,
+            link,
+            source,
+            content_id
+        FROM chapter WHERE content_id = ?`,
+		contentId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var chapter bushido.Chapter
+		var content bushido.Content
+		if err := rows.Scan(&chapter.ExternalId, &chapter.Title, &chapter.Link, &content.Source, &content.ExternalId); err != nil {
+			return nil, err
+		}
+		chapter.Content = &content
+		result = append(result, chapter)
+	}
+
+	return result, nil
+}

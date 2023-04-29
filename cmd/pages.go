@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
+	"github.com/victorfernandesraton/bushido"
 )
 
 var PageCmd = &cobra.Command{
@@ -13,17 +15,44 @@ var PageCmd = &cobra.Command{
 	TraverseChildren: true,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		sourcesData := Sources()
-		selectedSource, err := cmd.Flags().GetString("source")
+		var intId int64
+		var contentId string
+		var sourceStr string
+		var execSource bushido.Client
+
+		db, err := DatabseFactory()
 		if err != nil {
 			return err
 		}
-		execSource, ok := sourcesData[selectedSource]
+
+		if len(args) >= 1 {
+			intId, err = strconv.ParseInt(args[0], 10, 64)
+			if err != nil {
+				contentId = args[0]
+			}
+		}
+
+		if intId != 0 {
+			info, err := db.FindById(int(intId))
+			sourceStr = info.Source
+			contentId = info.ExternalId
+			if err != nil {
+				return err
+			}
+
+		} else {
+			sourceStr, err = cmd.Flags().GetString("source")
+			if err != nil {
+				return err
+			}
+		}
+		sourcesData := Sources()
+		execSource, ok := sourcesData[sourceStr]
 		if !ok {
-			return fmt.Errorf(NotFoundSource, selectedSource)
+			return fmt.Errorf(NotFoundSource, sourceStr)
 
 		}
-		res, err := execSource.Pages(args[0], args[1])
+		res, err := execSource.Pages(contentId, args[1])
 		if err != nil {
 			return err
 		}
