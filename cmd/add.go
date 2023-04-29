@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -34,8 +33,6 @@ var AddCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-
-		log.Println(res)
 
 		if err := db.Add(*res); err != nil {
 			return err

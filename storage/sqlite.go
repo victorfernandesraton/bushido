@@ -3,7 +3,6 @@ package storage
 import (
 	"database/sql"
 	"errors"
-	"log"
 
 	"github.com/victorfernandesraton/bushido"
 )
@@ -70,7 +69,6 @@ func (s *StorageSqlte) Add(content bushido.Content) error {
 
 	_, err := s.db.Exec(query, content.ExternalId, content.Title, content.Link, content.Source, content.Description, content.Author)
 	if err != nil {
-
 		return err
 	}
 	return nil
@@ -168,7 +166,6 @@ func (s *StorageSqlte) AppendChapter(id int, chapters []bushido.Chapter) error {
 		return err
 	}
 	for _, c := range chapters {
-		log.Println("append chapter ", c.Title, c.ExternalId)
 		_, err := stmt.Exec(c.ExternalId, c.Title, c.Link, c.Content.Source, id)
 		if err != nil {
 			return err

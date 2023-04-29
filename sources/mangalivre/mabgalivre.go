@@ -34,7 +34,7 @@ type seriesItem struct {
 }
 
 type seriesResponse struct {
-	Series *[]seriesItem `json:"series"`
+	Series []seriesItem `json:"series"`
 }
 
 type chapterItem struct {
@@ -116,7 +116,7 @@ func (source *MangaLivre) Search(query string) ([]bushido.Content, error) {
 		return result, nil
 	}
 
-	for _, v := range *data.Series {
+	for _, v := range data.Series {
 		result = append(result, bushido.Content{
 			BasicContent: bushido.BasicContent{
 				ExternalId: fmt.Sprintf("%d", v.IDSerie),
@@ -278,17 +278,12 @@ func (source *MangaLivre) Pages(contentId string, chapterId string) ([]bushido.P
 
 	client := http.Client{}
 	res, err := client.Do(req)
-
 	if err != nil {
 		return nil, err
 	}
 
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("request status error, expect 200, got %v", res.StatusCode)
-	}
-
-	if err != nil {
-		return nil, err
 	}
 
 	var data pageResponse
