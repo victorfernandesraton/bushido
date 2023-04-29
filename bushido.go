@@ -35,3 +35,12 @@ type Client interface {
 	// List() ([]Content, error)
 	// Remove(id uint64) error
 }
+
+type LocalStorage interface {
+	Add(Content) error
+	// Remove(int) error
+	FindById(int) (*Content, error)
+	FindByLink(string) (*Content, error)
+
+	// AppendChapter([]Chapter) error
+}

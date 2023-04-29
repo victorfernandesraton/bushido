@@ -8,7 +8,7 @@ import (
 
 var ChapterCmd = &cobra.Command{
 	Use:              "chapter [LINK]",
-	Short:            "Get mangainfo from source",
+	Short:            "Get chapters from manga link",
 	Args:             cobra.MinimumNArgs(1),
 	TraverseChildren: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -34,10 +34,10 @@ var ChapterCmd = &cobra.Command{
 
 		var rows [][]string
 		for _, content := range res {
-			rows = append(rows, []string{content.Title, content.ExternalId, content.Link})
+			rows = append(rows, []string{content.Title, content.ExternalId, content.Link, content.Content.ExternalId})
 		}
 
-		table := RenderTable([]string{"Title", "id", "link"}, rows)
+		table := RenderTable([]string{"Title", "id", "link", "contend_id"}, rows)
 		table.Render()
 		return nil
 	},

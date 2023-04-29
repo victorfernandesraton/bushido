@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"database/sql"
+
 	"github.com/spf13/cobra"
 	"github.com/victorfernandesraton/bushido"
 	"github.com/victorfernandesraton/bushido/sources/mangalivre"
+	"github.com/victorfernandesraton/bushido/storage"
 )
 
 const NotFoundSource = "not found source %v"
@@ -30,4 +33,18 @@ func Sources() map[string]bushido.Client {
 	return map[string]bushido.Client{
 		"mangalivre": mangalivre.New(),
 	}
+}
+
+func DatabseFactory() (bushido.LocalStorage, error) {
+	db, err := sql.Open("sqlite3", "sqlite-bushido.db")
+	if err != nil {
+		return nil, err
+	}
+
+	st := storage.New(db)
+
+	if err := st.CreateTables(); err != nil {
+		return nil, err
+	}
+	return st, nil
 }

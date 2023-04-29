@@ -244,16 +244,21 @@ func (source *MangaLivre) chaptersByPage(link string, page int) ([]bushido.Chapt
 
 	for _, v := range *data.Chapters {
 		resultLink := "not avaliable"
+		externalId := fmt.Sprintf("%d", v.IDChapter)
 		if len(v.Releases) > 0 {
 			for _, releases := range v.Releases {
+				externalId = fmt.Sprintf("%d", releases.IDRelease)
 				resultLink = fmt.Sprintf("https://mangalivre.net/ler/%s/online/%d/%s", name, releases.IDRelease, v.Number)
 				break
 			}
 		}
 		result = append(result, bushido.Chapter{
-			ExternalId: fmt.Sprintf("%d", v.IDChapter),
+			ExternalId: externalId,
 			Title:      fmt.Sprintf("%s - %s", v.Name, v.Number),
 			Link:       resultLink,
+			Content: &bushido.Content{
+				BasicContent: bushido.BasicContent{ExternalId: fmt.Sprintf("%d", id)},
+			},
 		})
 	}
 

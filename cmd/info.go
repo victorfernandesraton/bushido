@@ -23,10 +23,23 @@ var InfoCmd = &cobra.Command{
 			return fmt.Errorf(NotFoundSource, selectedSource)
 
 		}
-		res, err := execSource.Info(args[0])
+
+		db, err := DatabseFactory()
 		if err != nil {
 			return err
 		}
+
+		res, err := db.FindByLink(args[0])
+		if err != nil {
+			if err.Error() != "content not found" {
+				return err
+			}
+			res, err = execSource.Info(args[0])
+			if err != nil {
+				return err
+			}
+		}
+
 		table := RenderTable([]string{"Title", "Author", "Link", "source"}, [][]string{
 			{res.Title, res.Author, res.Link, res.Source},
 		})
