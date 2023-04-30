@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -40,8 +41,8 @@ var InfoCmd = &cobra.Command{
 			}
 		}
 
-		table := RenderTable([]string{"Title", "Author", "Link", "source"}, [][]string{
-			{res.Title, res.Author, res.Link, res.Source},
+		table := RenderTable([]string{"ID", "Title", "Author", "Link", "source"}, [][]string{
+			{strconv.Itoa(res.ID), res.Title, res.Author, res.Link, res.Source},
 		})
 
 		table.Render()

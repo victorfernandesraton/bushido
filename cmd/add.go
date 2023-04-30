@@ -8,7 +8,7 @@ import (
 
 var AddCmd = &cobra.Command{
 	Use:              "add [LINK]",
-	Short:            "add manga in local storage",
+	Short:            "Add manga in local storage",
 	Args:             cobra.MinimumNArgs(1),
 	TraverseChildren: true,
 

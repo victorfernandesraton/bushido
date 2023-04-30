@@ -49,10 +49,10 @@ var ListCmd = &cobra.Command{
 
 		var rows [][]string
 		for _, content := range res {
-			rows = append(rows, []string{content.Title, content.Author, content.Link, content.Source})
+			rows = append(rows, []string{strconv.Itoa(content.ID), content.Title, content.Author, content.Link, content.Source})
 		}
 
-		table := RenderTable([]string{"Title", "Author", "Link", "source"}, rows)
+		table := RenderTable([]string{"ID", "Title", "Author", "Link", "source"}, rows)
 
 		table.Render()
 

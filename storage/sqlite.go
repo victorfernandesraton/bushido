@@ -7,15 +7,15 @@ import (
 	"github.com/victorfernandesraton/bushido"
 )
 
-type StorageSqlte struct {
+type StorageSqlite struct {
 	db *sql.DB
 }
 
-func New(db *sql.DB) *StorageSqlte {
-	return &StorageSqlte{db: db}
+func New(db *sql.DB) *StorageSqlite {
+	return &StorageSqlite{db: db}
 }
 
-func (s *StorageSqlte) CreateTables() error {
+func (s *StorageSqlite) CreateTables() error {
 	err := s.createTableContent()
 	if err != nil {
 		return err
@@ -26,10 +26,15 @@ func (s *StorageSqlte) CreateTables() error {
 		return err
 	}
 
+	err = s.createTablePages()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (s *StorageSqlte) createTableContent() error {
+func (s *StorageSqlite) createTableContent() error {
 	query := `
     CREATE TABLE IF NOT EXISTS content(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,9 +51,9 @@ func (s *StorageSqlte) createTableContent() error {
 
 }
 
-func (s *StorageSqlte) createTableChapters() error {
+func (s *StorageSqlite) createTableChapters() error {
 	query := `
-    CREATE TABLE IF NOT EXISTS chapter (
+	CREATE TABLE IF NOT EXISTS chapter (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		external_id INTEGER NOT NULL,
 		title TEXT NOT NULL,
@@ -63,8 +68,24 @@ func (s *StorageSqlte) createTableChapters() error {
 	return err
 
 }
+func (s *StorageSqlite) createTablePages() error {
+	query := `CREATE TABLE IF NOT EXISTS page (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		chapter_id INTEGER NOT NULL,
+		content_id INTEGER NOT NULL,
+		source TEXT NOT NULL,
+		page_index INTEGER NOT NULL,
+		link TEXT NOT NULL,
+		FOREIGN KEY (content_id) REFERENCES content(id),
+		FOREIGN KEY (chapter_id) REFERENCES chapter(id),
+		UNIQUE( content_id, chapter_id, page_index, source)
+	);`
 
-func (s *StorageSqlte) Add(content bushido.Content) error {
+	_, err := s.db.Exec(query)
+	return err
+
+}
+func (s *StorageSqlite) Add(content bushido.Content) error {
 	query := `INSERT INTO content (external_id, title, link, source, description, author) values (?, ? , ? , ?, ? , ?)`
 
 	_, err := s.db.Exec(query, content.ExternalId, content.Title, content.Link, content.Source, content.Description, content.Author)
@@ -74,8 +95,8 @@ func (s *StorageSqlte) Add(content bushido.Content) error {
 	return nil
 }
 
-func (s *StorageSqlte) FindById(id int) (*bushido.Content, error) {
-	query := `select external_id, title, link, source, description, author from content where id = ?`
+func (s *StorageSqlite) FindById(id int) (*bushido.Content, error) {
+	query := `select id, external_id, title, link, source, description, author from content where id = ?`
 
 	rows, err := s.db.Query(query, id)
 	if err != nil {
@@ -87,7 +108,7 @@ func (s *StorageSqlte) FindById(id int) (*bushido.Content, error) {
 	var contents []bushido.Content
 	for rows.Next() {
 		var content bushido.Content
-		if err := rows.Scan(&content.ExternalId, &content.Title, &content.Link, &content.Source, &content.Description, &content.Author); err != nil {
+		if err := rows.Scan(&content.ID, &content.ExternalId, &content.Title, &content.Link, &content.Source, &content.Description, &content.Author); err != nil {
 			return nil, err
 		}
 		contents = append(contents, content)
@@ -100,8 +121,8 @@ func (s *StorageSqlte) FindById(id int) (*bushido.Content, error) {
 	return &contents[0], nil
 }
 
-func (s *StorageSqlte) FindByLink(link string) (*bushido.Content, error) {
-	query := `select external_id, title, link, source, description, author from content where link = ?`
+func (s *StorageSqlite) FindByLink(link string) (*bushido.Content, error) {
+	query := `select id, external_id, title, link, source, description, author from content where link = ?`
 
 	rows, err := s.db.Query(query, link)
 	if err != nil {
@@ -113,7 +134,7 @@ func (s *StorageSqlte) FindByLink(link string) (*bushido.Content, error) {
 	var contents []bushido.Content
 	for rows.Next() {
 		var content bushido.Content
-		if err := rows.Scan(&content.ExternalId, &content.Title, &content.Link, &content.Source, &content.Description, &content.Author); err != nil {
+		if err := rows.Scan(&content.ID, &content.ExternalId, &content.Title, &content.Link, &content.Source, &content.Description, &content.Author); err != nil {
 			return nil, err
 		}
 		contents = append(contents, content)
@@ -126,8 +147,8 @@ func (s *StorageSqlte) FindByLink(link string) (*bushido.Content, error) {
 	return &contents[0], nil
 }
 
-func (s *StorageSqlte) ListByName(name string) ([]bushido.Content, error) {
-	query := `select external_id, title, link, source, description, author from content where LOWER(title) LIKE '%' || LOWER(?) || '%'`
+func (s *StorageSqlite) ListByName(name string) ([]bushido.Content, error) {
+	query := `select id, external_id, title, link, source, description, author from content where LOWER(title) LIKE '%' || LOWER(?) || '%'`
 
 	rows, err := s.db.Query(query, name)
 	if err != nil {
@@ -139,7 +160,7 @@ func (s *StorageSqlte) ListByName(name string) ([]bushido.Content, error) {
 	var contents []bushido.Content
 	for rows.Next() {
 		var content bushido.Content
-		if err := rows.Scan(&content.ExternalId, &content.Title, &content.Link, &content.Source, &content.Description, &content.Author); err != nil {
+		if err := rows.Scan(&content.ID, &content.ExternalId, &content.Title, &content.Link, &content.Source, &content.Description, &content.Author); err != nil {
 			return nil, err
 		}
 		contents = append(contents, content)
@@ -148,7 +169,7 @@ func (s *StorageSqlte) ListByName(name string) ([]bushido.Content, error) {
 	return contents, nil
 }
 
-func (s *StorageSqlte) AppendChapter(id int, chapters []bushido.Chapter) error {
+func (s *StorageSqlite) AppendChapter(id int, chapters []bushido.Chapter) error {
 	query := `INSERT INTO chapter (external_id, title, link, source, content_id)
     VALUES (?, ?, ?, ?, ?)
     ON CONFLICT(external_id, content_id) DO UPDATE SET
@@ -180,18 +201,18 @@ func (s *StorageSqlte) AppendChapter(id int, chapters []bushido.Chapter) error {
 
 }
 
-func (s *StorageSqlte) ListChaptersByContentId(contentId int) ([]bushido.Chapter, error) {
+func (s *StorageSqlite) ListChaptersByContentId(contentId int) ([]bushido.Chapter, error) {
 	var result []bushido.Chapter
-	rows, err := s.db.Query(`
-        SELECT
-            external_id,
-            title,
-            link,
-            source,
-            content_id
-        FROM chapter WHERE content_id = ?`,
-		contentId,
-	)
+	query := `SELECT
+		id,
+		external_id,
+		title,
+		link,
+		source,
+		content_id
+	FROM chapter WHERE content_id = ?`
+
+	rows, err := s.db.Query(query, contentId)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +221,7 @@ func (s *StorageSqlte) ListChaptersByContentId(contentId int) ([]bushido.Chapter
 	for rows.Next() {
 		var chapter bushido.Chapter
 		var content bushido.Content
-		if err := rows.Scan(&chapter.ExternalId, &chapter.Title, &chapter.Link, &content.Source, &content.ExternalId); err != nil {
+		if err := rows.Scan(&chapter.ID, &chapter.ExternalId, &chapter.Title, &chapter.Link, &content.Source, &content.ExternalId); err != nil {
 			return nil, err
 		}
 		chapter.Content = &content
@@ -208,4 +229,74 @@ func (s *StorageSqlte) ListChaptersByContentId(contentId int) ([]bushido.Chapter
 	}
 
 	return result, nil
+}
+
+func (s *StorageSqlite) AppendPages(content_id, chapter_id int, source string, pages []bushido.Page) error {
+	query := `INSERT INTO page (
+		content_id,
+		chapter_id,
+		source,
+		page_index,
+		link
+	)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(content_id, chapter_id, page_index, source) DO UPDATE SET
+        link = excluded.link`
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.Prepare(query)
+	if err != nil {
+		return err
+	}
+	for idx, p := range pages {
+		_, err := stmt.Exec(content_id, chapter_id, source, idx, p)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (s *StorageSqlite) FindChapterById(id int) (*bushido.Chapter, error) {
+	query := `SELECT
+		id,
+		external_id,
+		title,
+		link,
+		source,
+		content_id
+	FROM chapter WHERE id = ?`
+
+	rows, err := s.db.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var chapters []bushido.Chapter
+	for rows.Next() {
+		var content bushido.Content
+		var chapter bushido.Chapter
+		if err := rows.Scan(&chapter.ID, &chapter.ExternalId, &chapter.Title, &chapter.Link, &content.Source, &content.ID); err != nil {
+			return nil, err
+		}
+		chapter.Content = &content
+		chapters = append(chapters, chapter)
+	}
+
+	if len(chapters) != 1 {
+		return nil, errors.New("chapter not found")
+	}
+
+	return &chapters[0], nil
 }

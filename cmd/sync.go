@@ -11,7 +11,7 @@ import (
 
 var SyncCmd = &cobra.Command{
 	Use:              "sync [ID]",
-	Short:            "sync manga chapters from remote to local storage",
+	Short:            "Sync manga chapters from remote to local storage",
 	Args:             cobra.MinimumNArgs(0),
 	TraverseChildren: true,
 

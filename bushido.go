@@ -1,6 +1,7 @@
 package bushido
 
 type BasicContent struct {
+	ID         int
 	ExternalId string
 	Title      string
 	Link       string
@@ -15,6 +16,7 @@ type Content struct {
 }
 
 type Chapter struct {
+	ID         int
 	ExternalId string
 	Title      string
 	Link       string
@@ -33,10 +35,11 @@ type Client interface {
 
 type LocalStorage interface {
 	Add(Content) error
-	// Remove(int) error
 	FindById(int) (*Content, error)
 	FindByLink(string) (*Content, error)
 	ListByName(string) ([]Content, error)
 	AppendChapter(int, []Chapter) error
 	ListChaptersByContentId(int) ([]Chapter, error)
+	FindChapterById(int) (*Chapter, error)
+	AppendPages(int, int, string, []Page) error
 }
