@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	cmd.RootCmd.AddCommand(cmd.InfoCmd, cmd.ChapterCmd, cmd.SearchCmd, cmd.PageCmd, cmd.AddCmd, cmd.ListCmd, cmd.SyncCmd)
+  cmd.RootCmd.AddCommand(cmd.InfoCmd, cmd.ChapterCmd, cmd.SearchCmd, cmd.PageCmd, cmd.AddCmd, cmd.ListCmd, cmd.SyncCmd, cmd.SourceCmd)
 }
 
 func main() {
