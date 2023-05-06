@@ -169,7 +169,7 @@ func (s *StorageSqlite) ListByName(name string) ([]bushido.Content, error) {
 	return contents, nil
 }
 
-func (s *StorageSqlite) AppendChapter(id int, chapters []bushido.Chapter) error {
+func (s *StorageSqlite) AppendChapter(content bushido.Content, chapters []bushido.Chapter) error {
 	query := `INSERT INTO chapter (external_id, title, link, source, content_id)
     VALUES (?, ?, ?, ?, ?)
     ON CONFLICT(external_id, content_id) DO UPDATE SET
@@ -187,7 +187,7 @@ func (s *StorageSqlite) AppendChapter(id int, chapters []bushido.Chapter) error 
 		return err
 	}
 	for _, c := range chapters {
-		_, err := stmt.Exec(c.ExternalId, c.Title, c.Link, c.Content.Source, id)
+		_, err := stmt.Exec(c.ExternalId, c.Title, c.Link, c.Content.Source, content.ID)
 		if err != nil {
 			return err
 		}
@@ -231,7 +231,7 @@ func (s *StorageSqlite) ListChaptersByContentId(contentId int) ([]bushido.Chapte
 	return result, nil
 }
 
-func (s *StorageSqlite) AppendPages(content_id, chapter_id int, source string, pages []bushido.Page) error {
+func (s *StorageSqlite) AppendPages(chapter bushido.Chapter, pages []bushido.Page) error {
 	query := `INSERT INTO page (
 		content_id,
 		chapter_id,
@@ -252,7 +252,7 @@ func (s *StorageSqlite) AppendPages(content_id, chapter_id int, source string, p
 		return err
 	}
 	for idx, p := range pages {
-		_, err := stmt.Exec(content_id, chapter_id, source, idx, p)
+		_, err := stmt.Exec(chapter.Content.ID , chapter.ID, chapter.Content.Source, idx, p)
 		if err != nil {
 			return err
 		}

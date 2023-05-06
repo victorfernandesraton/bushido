@@ -70,10 +70,9 @@ var SyncCmd = &cobra.Command{
 				return err
 			}
 
-			if err := db.AppendChapter(int(intId), chapters); err != nil {
+			if err := db.AppendChapter(c, chapters); err != nil {
 				return err
 			}
-
 		}
 
 		return nil
