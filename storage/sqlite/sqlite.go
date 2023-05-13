@@ -1,18 +1,25 @@
-package storage
+package sqlite
 
 import (
-	"database/sql"
-	"errors"
-
-	"github.com/victorfernandesraton/bushido"
+  "database/sql"
+  "errors"
+  _ "github.com/mattn/go-sqlite3"
+  "github.com/victorfernandesraton/bushido"
 )
+func New() (bushido.LocalStorage, error) {
+	db, err := sql.Open("sqlite3", "sqlite-bushido.db")
+	if err != nil {
+		return nil, err
+	}
 
+	st := &StorageSqlite{db: db}
+	if err := st.CreateTables(); err != nil {
+		return nil, err
+	}
+	return st, nil
+}
 type StorageSqlite struct {
 	db *sql.DB
-}
-
-func New(db *sql.DB) *StorageSqlite {
-	return &StorageSqlite{db: db}
 }
 
 func (s *StorageSqlite) CreateTables() error {

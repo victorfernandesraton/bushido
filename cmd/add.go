@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
+	"github.com/victorfernandesraton/bushido/storage"
 )
-
 var AddCmd = &cobra.Command{
+
 	Use:              "add [LINK]",
 	Short:            "Add manga in local storage",
 	Args:             cobra.MinimumNArgs(1),
@@ -14,8 +16,8 @@ var AddCmd = &cobra.Command{
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sourcesData := Sources()
+		db, err := storage.DatabseFactory()
 
-		db, err := DatabseFactory()
 		if err != nil {
 			return err
 		}
@@ -37,6 +39,8 @@ var AddCmd = &cobra.Command{
 		if err := db.Add(*res); err != nil {
 			return err
 		}
+
+    log.Println(fmt.Sprintf("Manga %v has been added in local storage", res.Title))
 
 		return nil
 	},

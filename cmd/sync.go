@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/victorfernandesraton/bushido"
+	"github.com/victorfernandesraton/bushido/storage"
 )
 
 var SyncCmd = &cobra.Command{
@@ -30,7 +31,7 @@ var SyncCmd = &cobra.Command{
 			return err
 		}
 
-		db, err := DatabseFactory()
+    db, err := storage.DatabseFactory()
 		if err != nil {
 			return err
 		}

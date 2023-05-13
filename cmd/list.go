@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/victorfernandesraton/bushido"
+	"github.com/victorfernandesraton/bushido/storage"
 )
 
 var ListCmd = &cobra.Command{
@@ -20,7 +21,7 @@ var ListCmd = &cobra.Command{
 		var res []bushido.Content
 		var intId int64
 
-		db, err := DatabseFactory()
+		db, err := storage.DatabseFactory()
 		if err != nil {
 			return err
 		}

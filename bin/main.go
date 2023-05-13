@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/victorfernandesraton/bushido/cmd"
 )
 
 func init() {
-  cmd.RootCmd.AddCommand(cmd.InfoCmd, cmd.ChapterCmd, cmd.SearchCmd, cmd.PageCmd, cmd.AddCmd, cmd.ListCmd, cmd.SyncCmd, cmd.SourceCmd)
+  cmd.RemoteCmd.AddCommand(cmd.SearchCmd, cmd.InfoCmd, cmd.AddCmd)
+  cmd.LocalCmd.AddCommand(cmd.ListCmd)
+  cmd.RootCmd.AddCommand(cmd.LocalCmd, cmd.RemoteCmd, cmd.ChapterCmd, cmd.PageCmd, cmd.SyncCmd, cmd.SourceCmd)
 }
 
 func main() {

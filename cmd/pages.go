@@ -1,12 +1,13 @@
 package cmd
 
 import (
-  "errors"
-  "fmt"
-  "strconv"
+	"errors"
+	"fmt"
+	"strconv"
 
-  "github.com/spf13/cobra"
-  "github.com/victorfernandesraton/bushido"
+	"github.com/spf13/cobra"
+	"github.com/victorfernandesraton/bushido"
+	"github.com/victorfernandesraton/bushido/storage"
 )
 
 var PageCmd = &cobra.Command{
@@ -18,7 +19,7 @@ var PageCmd = &cobra.Command{
   RunE: func(cmd *cobra.Command, args []string) error {
     var execSource bushido.Client
 
-    db, err := DatabseFactory()
+    db, err := storage.DatabseFactory()
     if err != nil {
       return err
     }

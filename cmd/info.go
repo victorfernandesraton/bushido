@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
+	"github.com/victorfernandesraton/bushido/storage"
 )
 
 var InfoCmd = &cobra.Command{
@@ -25,7 +26,7 @@ var InfoCmd = &cobra.Command{
 
 		}
 
-		db, err := DatabseFactory()
+		db, err := storage.DatabseFactory()
 		if err != nil {
 			return err
 		}
@@ -52,7 +53,5 @@ var InfoCmd = &cobra.Command{
 }
 
 func init() {
-
-	InfoCmd.MarkPersistentFlagRequired("source")
-
+  InfoCmd.MarkPersistentFlagRequired("source")
 }
