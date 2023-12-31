@@ -1,15 +1,11 @@
 package bushido
 
-type BasicContent struct {
-	ID         int
-	ExternalId string
-	Title      string
-	Link       string
-	Source     string
-}
-
 type Content struct {
-	BasicContent
+	ID            int
+	ExternalId    string
+	Title         string
+	Link          string
+	Source        string
 	Description   string
 	Author        string
 	TotalChapters int

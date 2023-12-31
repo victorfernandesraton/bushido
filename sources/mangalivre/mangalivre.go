@@ -118,12 +118,10 @@ func (source *MangaLivre) Search(query string) ([]bushido.Content, error) {
 
 	for _, v := range data.Series {
 		result = append(result, bushido.Content{
-			BasicContent: bushido.BasicContent{
-				ExternalId: fmt.Sprintf("%d", v.IDSerie),
-				Title:      v.Name,
-				Source:     "mangalivre",
-				Link:       fmt.Sprintf("https://mangalivre.net%s", v.Link),
-			},
+			ExternalId: fmt.Sprintf("%d", v.IDSerie),
+			Title:      v.Name,
+			Source:     "mangalivre",
+			Link:       fmt.Sprintf("https://mangalivre.net%s", v.Link),
 		})
 	}
 
@@ -257,8 +255,8 @@ func (source *MangaLivre) chaptersByPage(link string, page int) ([]bushido.Chapt
 			Title:      fmt.Sprintf("%s - %s", v.Name, v.Number),
 			Link:       resultLink,
 			Content: &bushido.Content{
-				BasicContent: bushido.BasicContent{ExternalId: fmt.Sprintf("%d", id), Source: "mangalivre"},
-			},
+				ExternalId: fmt.Sprintf("%d", id),
+				Source:     "mangalivre"},
 		})
 	}
 
@@ -329,11 +327,9 @@ func (source *MangaLivre) Info(link string) (*bushido.Content, error) {
 	}
 
 	return &bushido.Content{
-		BasicContent: bushido.BasicContent{
-			Title:  titleNode.FirstChild.Data,
-			Link:   link,
-			Source: "mangalivre",
-		},
+		Title:         titleNode.FirstChild.Data,
+		Link:          link,
+		Source:        "mangalivre",
 		TotalChapters: totalChapters,
 		Description:   descriptionNosw.FirstChild.Data,
 	}, nil

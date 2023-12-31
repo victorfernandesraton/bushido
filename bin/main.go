@@ -8,9 +8,9 @@ import (
 )
 
 func init() {
-  cmd.RemoteCmd.AddCommand(cmd.SearchCmd, cmd.InfoCmd, cmd.AddCmd)
-  cmd.LocalCmd.AddCommand(cmd.ListCmd)
-  cmd.RootCmd.AddCommand(cmd.LocalCmd, cmd.RemoteCmd, cmd.ChapterCmd, cmd.PageCmd, cmd.SyncCmd, cmd.SourceCmd)
+	cmd.RemoteCmd.AddCommand(cmd.SearchCmd, cmd.InfoCmd, cmd.AddCmd)
+	cmd.LocalCmd.AddCommand(cmd.ListCmd)
+	cmd.RootCmd.AddCommand(cmd.LocalCmd, cmd.RemoteCmd, cmd.ChapterCmd, cmd.PageCmd, cmd.SyncCmd, cmd.SourceCmd, cmd.ServerCmd)
 }
 
 func main() {
