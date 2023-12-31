@@ -34,7 +34,6 @@ type Client interface {
 	Chapters(link string, recursive bool) ([]Chapter, error)
 	Pages(contentId string, chapterId string) ([]Page, error)
 	Info(link string) (*Content, error)
-	Source() string
 }
 
 type LocalStorage interface {

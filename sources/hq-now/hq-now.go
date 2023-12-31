@@ -38,7 +38,7 @@ type HqNowVariablesByName struct {
 	Name string `json:"name"`
 }
 
-func NewClient(httpClient *http.Client) *HqNow {
+func NewClient(httpClient *http.Client) bushido.Client {
 	return &HqNow{
 		httpClient: httpClient,
 		Source: &bushido.Source{
@@ -92,9 +92,18 @@ func (c *HqNow) parseSearchResult(item *GetHqsByName) (result *bushido.Content) 
 	return
 }
 
-/*
-	Chapters(link string, recursive bool) ([]Chapter, error)
-	Pages(contentId string, chapterId string) ([]Page, error)
-	Info(link string) (*Content, error)
-	Source() string
-*/
+func (c *HqNow) Info(link string) (content *bushido.Content, err error) {
+	// TODO: wait impl
+	return
+}
+
+func (c *HqNow) Chapters(link string, recursive bool) (chapters []bushido.Chapter, err error) {
+
+	// TODO: wait impl
+	return
+}
+
+func (c *HqNow) Pages(contentId string, chapterId string) (pages []bushido.Page, err error) {
+	// TDD: wait impl
+	return
+}

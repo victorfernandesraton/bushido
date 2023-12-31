@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/victorfernandesraton/bushido/bushido/helpers/assertion"
+	"github.com/victorfernandesraton/bushido/helpers/assertion"
 	hqnow "github.com/victorfernandesraton/bushido/sources/hq-now"
 )
 
