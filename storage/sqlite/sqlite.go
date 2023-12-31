@@ -98,7 +98,7 @@ func (s *StorageSqlite) createTablePages() error {
 func (s *StorageSqlite) Add(content bushido.Content) error {
 	query := `INSERT INTO content (external_id, title, link, source, description, author) values (?, ? , ? , ?, ? , ?)`
 
-	_, err := s.db.Exec(query, content.ExternalId, content.Title, content.Link, content.Source, content.Description, content.Author)
+	_, err := s.db.Exec(query, content.ExternalId, content.Title, content.Link, content.Source.ID, content.Description, content.Author)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (s *StorageSqlite) FindById(id int) (*bushido.Content, error) {
 	var contents []bushido.Content
 	for rows.Next() {
 		var content bushido.Content
-		if err := rows.Scan(&content.ID, &content.ExternalId, &content.Title, &content.Link, &content.Source, &content.Description, &content.Author); err != nil {
+		if err := rows.Scan(&content.ID, &content.ExternalId, &content.Title, &content.Link, &content.Source.ID, &content.Description, &content.Author); err != nil {
 			return nil, err
 		}
 		contents = append(contents, content)
@@ -144,7 +144,7 @@ func (s *StorageSqlite) FindByLink(link string) (*bushido.Content, error) {
 	var contents []bushido.Content
 	for rows.Next() {
 		var content bushido.Content
-		if err := rows.Scan(&content.ID, &content.ExternalId, &content.Title, &content.Link, &content.Source, &content.Description, &content.Author); err != nil {
+		if err := rows.Scan(&content.ID, &content.ExternalId, &content.Title, &content.Link, &content.Source.ID, &content.Description, &content.Author); err != nil {
 			return nil, err
 		}
 		contents = append(contents, content)
@@ -170,7 +170,7 @@ func (s *StorageSqlite) ListByName(name string) ([]bushido.Content, error) {
 	var contents []bushido.Content
 	for rows.Next() {
 		var content bushido.Content
-		if err := rows.Scan(&content.ID, &content.ExternalId, &content.Title, &content.Link, &content.Source, &content.Description, &content.Author); err != nil {
+		if err := rows.Scan(&content.ID, &content.ExternalId, &content.Title, &content.Link, &content.Source.ID, &content.Description, &content.Author); err != nil {
 			return nil, err
 		}
 		contents = append(contents, content)
@@ -231,7 +231,7 @@ func (s *StorageSqlite) ListChaptersByContentId(contentId int) ([]bushido.Chapte
 	for rows.Next() {
 		var chapter bushido.Chapter
 		var content bushido.Content
-		if err := rows.Scan(&chapter.ID, &chapter.ExternalId, &chapter.Title, &chapter.Link, &content.Source, &content.ExternalId); err != nil {
+		if err := rows.Scan(&chapter.ID, &chapter.ExternalId, &chapter.Title, &chapter.Link, &content.Source.ID, &content.ExternalId); err != nil {
 			return nil, err
 		}
 		chapter.Content = &content
@@ -297,7 +297,7 @@ func (s *StorageSqlite) FindChapterById(id int) (*bushido.Chapter, error) {
 	for rows.Next() {
 		var content bushido.Content
 		var chapter bushido.Chapter
-		if err := rows.Scan(&chapter.ID, &chapter.ExternalId, &chapter.Title, &chapter.Link, &content.Source, &content.ID); err != nil {
+		if err := rows.Scan(&chapter.ID, &chapter.ExternalId, &chapter.Title, &chapter.Link, &content.Source.ID, &content.ID); err != nil {
 			return nil, err
 		}
 		chapter.Content = &content
