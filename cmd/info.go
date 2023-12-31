@@ -43,7 +43,7 @@ var InfoCmd = &cobra.Command{
 		}
 
 		table := RenderTable([]string{"ID", "Title", "Author", "Link", "source"}, [][]string{
-			{strconv.Itoa(res.ID), res.Title, res.Author, res.Link, res.Source},
+			{strconv.Itoa(res.ID), res.Title, res.Author, res.Link, res.Source.ID},
 		})
 
 		table.Render()
@@ -53,5 +53,5 @@ var InfoCmd = &cobra.Command{
 }
 
 func init() {
-  InfoCmd.MarkPersistentFlagRequired("source")
+	InfoCmd.MarkPersistentFlagRequired("source")
 }

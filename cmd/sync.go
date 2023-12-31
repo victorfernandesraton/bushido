@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/victorfernandesraton/bushido"
+	"github.com/victorfernandesraton/bushido/bushido"
 	"github.com/victorfernandesraton/bushido/storage"
 )
 
@@ -31,7 +31,7 @@ var SyncCmd = &cobra.Command{
 			return err
 		}
 
-    db, err := storage.DatabseFactory()
+		db, err := storage.DatabseFactory()
 		if err != nil {
 			return err
 		}
@@ -60,7 +60,7 @@ var SyncCmd = &cobra.Command{
 		sourcesData := Sources()
 
 		for _, c := range contents {
-			execSource, ok := sourcesData[c.Source]
+			execSource, ok := sourcesData[c.Source.ID]
 			if !ok {
 				return fmt.Errorf(NotFoundSource, selectedSource)
 			}

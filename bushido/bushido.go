@@ -5,9 +5,10 @@ type Content struct {
 	ExternalId    string
 	Title         string
 	Link          string
-	Source        string
+	Source        *Source
 	Description   string
 	Author        string
+	Language      string
 	TotalChapters int
 }
 
@@ -20,6 +21,13 @@ type Chapter struct {
 }
 
 type Page string
+
+type Source struct {
+	Domain    string
+	ID        string
+	Active    bool
+	Languages []string
+}
 
 type Client interface {
 	Search(query string) ([]Content, error)

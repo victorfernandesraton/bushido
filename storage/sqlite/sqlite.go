@@ -1,11 +1,13 @@
 package sqlite
 
 import (
-  "database/sql"
-  "errors"
-  _ "github.com/mattn/go-sqlite3"
-  "github.com/victorfernandesraton/bushido"
+	"database/sql"
+	"errors"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/victorfernandesraton/bushido/bushido"
 )
+
 func New() (bushido.LocalStorage, error) {
 	db, err := sql.Open("sqlite3", "sqlite-bushido.db")
 	if err != nil {
@@ -18,6 +20,7 @@ func New() (bushido.LocalStorage, error) {
 	}
 	return st, nil
 }
+
 type StorageSqlite struct {
 	db *sql.DB
 }
@@ -259,7 +262,7 @@ func (s *StorageSqlite) AppendPages(chapter bushido.Chapter, pages []bushido.Pag
 		return err
 	}
 	for idx, p := range pages {
-		_, err := stmt.Exec(chapter.Content.ID , chapter.ID, chapter.Content.Source, idx, p)
+		_, err := stmt.Exec(chapter.Content.ID, chapter.ID, chapter.Content.Source, idx, p)
 		if err != nil {
 			return err
 		}

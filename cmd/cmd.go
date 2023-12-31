@@ -2,11 +2,14 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/victorfernandesraton/bushido"
-	"github.com/victorfernandesraton/bushido/sources/mangalivre"
+	"github.com/victorfernandesraton/bushido/bushido"
 )
 
 const NotFoundSource = "not found source %v"
+
+type SourceItem interface {
+	New() *bushido.Source
+}
 
 var selectedSource string
 
@@ -27,7 +30,5 @@ func init() {
 }
 
 func Sources() map[string]bushido.Client {
-	return map[string]bushido.Client{
-		"mangalivre": mangalivre.New(),
-	}
+	return map[string]bushido.Client{}
 }

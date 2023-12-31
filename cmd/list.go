@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/victorfernandesraton/bushido"
+	"github.com/victorfernandesraton/bushido/bushido"
 	"github.com/victorfernandesraton/bushido/storage"
 )
 
@@ -50,7 +50,7 @@ var ListCmd = &cobra.Command{
 
 		var rows [][]string
 		for _, content := range res {
-			rows = append(rows, []string{strconv.Itoa(content.ID), content.Title, content.Author, content.Link, content.Source})
+			rows = append(rows, []string{strconv.Itoa(content.ID), content.Title, content.Author, content.Link, content.Source.ID})
 		}
 
 		table := RenderTable([]string{"ID", "Title", "Author", "Link", "source"}, rows)

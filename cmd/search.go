@@ -5,16 +5,16 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
-	"github.com/victorfernandesraton/bushido"
+	"github.com/victorfernandesraton/bushido/bushido"
 )
 
-func asyncSearch(wg *sync.WaitGroup, client bushido.Client , query string ,result chan<- []bushido.Content) {
-  defer wg.Done()
-  res, err := client.Search(query)
-  if err != nil {
-    panic(err)
-  }
-  result <- res
+func asyncSearch(wg *sync.WaitGroup, client bushido.Client, query string, result chan<- []bushido.Content) {
+	defer wg.Done()
+	res, err := client.Search(query)
+	if err != nil {
+		panic(err)
+	}
+	result <- res
 }
 
 var SearchCmd = &cobra.Command{
@@ -30,8 +30,8 @@ var SearchCmd = &cobra.Command{
 		}
 
 		var contents []bushido.Content
- 		if selectedSource != "" {
-		  execSource, ok := sourcesData[selectedSource]
+		if selectedSource != "" {
+			execSource, ok := sourcesData[selectedSource]
 			if !ok {
 				return fmt.Errorf(NotFoundSource, selectedSource)
 			}
@@ -41,27 +41,27 @@ var SearchCmd = &cobra.Command{
 			}
 			contents = append(contents, res...)
 		} else {
-      resultch := make(chan []bushido.Content)
-      var wg sync.WaitGroup
-      wg.Add(len(sourcesData))
+			resultch := make(chan []bushido.Content)
+			var wg sync.WaitGroup
+			wg.Add(len(sourcesData))
 
-      for _, v := range sourcesData {
-        go asyncSearch(&wg, v, args[0], resultch )
+			for _, v := range sourcesData {
+				go asyncSearch(&wg, v, args[0], resultch)
 			}
 
-      go func() {
-		    wg.Wait()
-		    close(resultch)
-	    }()
+			go func() {
+				wg.Wait()
+				close(resultch)
+			}()
 
-      for res :=range resultch {
-        contents = append(contents, res...)
-      }
+			for res := range resultch {
+				contents = append(contents, res...)
+			}
 		}
 
 		var rows [][]string
 		for _, content := range contents {
-			rows = append(rows, []string{content.Title, content.Author, content.Link, content.Source})
+			rows = append(rows, []string{content.Title, content.Author, content.Link, content.Source.ID})
 		}
 
 		table := RenderTable([]string{"Title", "Author", "Link", "source"}, rows)

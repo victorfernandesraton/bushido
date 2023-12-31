@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/victorfernandesraton/bushido"
+	"github.com/victorfernandesraton/bushido/bushido"
 	"github.com/victorfernandesraton/bushido/storage"
 )
 
@@ -40,7 +40,7 @@ var ChapterCmd = &cobra.Command{
 					return err
 				}
 				link = info.Link
-				sourceStr = info.Source
+				sourceStr = info.Source.ID
 			}
 		}
 
