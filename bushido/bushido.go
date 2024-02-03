@@ -1,8 +1,11 @@
 package bushido
 
+import (
+	"net/url"
+)
+
 type Content struct {
-	ID            int
-	ExternalId    string
+	ID            string
 	Title         string
 	Link          string
 	Source        *Source
@@ -10,14 +13,15 @@ type Content struct {
 	Author        string
 	Language      string
 	TotalChapters int
+	Cover         *url.URL
 }
 
 type Chapter struct {
-	ID         int
-	ExternalId string
-	Title      string
-	Link       string
-	Content    *Content
+	ID        string
+	Source    string
+	Title     string
+	Link      string
+	ContentId string
 }
 
 type Page string
@@ -31,9 +35,9 @@ type Source struct {
 
 type Client interface {
 	Search(query string) ([]Content, error)
-	Chapters(link string, recursive bool) ([]Chapter, error)
+	Chapters(id string) ([]Chapter, error)
 	Pages(contentId string, chapterId string) ([]Page, error)
-	Info(link string) (*Content, error)
+	Info(id string) (*Content, error)
 }
 
 type LocalStorage interface {

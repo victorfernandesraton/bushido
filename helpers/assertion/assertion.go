@@ -21,3 +21,8 @@ func AssertDeepEqual(t *testing.T, want, got any) {
 	t.Helper()
 	Assert(t, reflect.DeepEqual(want, got), fmt.Sprintf("want:\n%#v\n\ngot:\n%#v", want, got))
 }
+
+func AssertNotNil(t *testing.T, want any) {
+	t.Helper()
+	Assert(t, want != nil, fmt.Sprintf("want: '%v', got: '%v'", want, nil))
+}

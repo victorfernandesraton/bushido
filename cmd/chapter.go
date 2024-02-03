@@ -65,7 +65,7 @@ var ChapterCmd = &cobra.Command{
 				return err
 			}
 		} else {
-			res, err = execSource.Chapters(link, recursiveSearch)
+			res, err = execSource.Chapters(link)
 			if err != nil {
 				return err
 			}
@@ -73,7 +73,7 @@ var ChapterCmd = &cobra.Command{
 
 		var rows [][]string
 		for _, content := range res {
-			rows = append(rows, []string{strconv.Itoa(content.ID), content.Title, content.ExternalId, content.Link, content.Content.ExternalId})
+			rows = append(rows, []string{strconv.Itoa(content.ID), content.Title, content.ID, content.Link, content.ContentId})
 		}
 
 		table := RenderTable([]string{"ID", "Title", "id", "link", "contend_id"}, rows)
